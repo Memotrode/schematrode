@@ -1,6 +1,6 @@
 {
   "name": "@memotrode/schematrode",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Generic Zod model-schema helpers (registry, schema utilities) for Memotrode.",
   "keywords": [
     "firestore",
