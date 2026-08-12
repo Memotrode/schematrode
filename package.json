@@ -1,0 +1,62 @@
+{
+  "name": "@memotrode/schematrode",
+  "version": "0.0.0",
+  "description": "Generic Zod model-schema helpers (registry, schema utilities) for Memotrode.",
+  "keywords": [
+    "firestore",
+    "model-registry",
+    "schema",
+    "zod"
+  ],
+  "license": "MIT",
+  "author": "Paul Leduc (https://github.com/paulleduc)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Memotrode/schematrode.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    "./document.config": "./dist/document.config.mjs",
+    "./document.mapping": "./dist/document.mapping.mjs",
+    "./document.path": "./dist/document.path.mjs",
+    "./model.registry": "./dist/model.registry.mjs",
+    "./schema.utils": "./dist/schema.utils.mjs",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "check": "vp check",
+    "prepublishOnly": "vp pack",
+    "release": "bumpp && npm publish"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "@typescript/native-preview": "7.0.0-dev.20260509.2",
+    "bumpp": "^11.1.0",
+    "typescript": "^6.0.3",
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.2.4",
+    "vite-plus": "0.2.4",
+    "zod": "^4.4.3"
+  },
+  "peerDependencies": {
+    "zod": "^4.4.3"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.21.0",
+      "onFail": "download"
+    }
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
