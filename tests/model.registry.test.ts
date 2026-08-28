@@ -90,3 +90,23 @@ test("fromJson validates against an explicit scoped schema when given one", () =
 
   expect(result).toEqual({ _type: "widget", id: "1" });
 });
+
+test("fromJson accepts a null type to hydrate an unregistered response schema", () => {
+  const ResponseSchema = z.object({
+    session_id: z.string(),
+    created_at: z.date(),
+  });
+  const date = new Date(2026, 0, 1);
+
+  const result = fromJson(
+    null,
+    { session_id: "1", created_at: date.toISOString() },
+    ResponseSchema,
+  );
+
+  expect(result).toEqual({ session_id: "1", created_at: date });
+});
+
+test("fromJson throws if no schema is given and type is null", () => {
+  expect(() => fromJson(null, { id: "1" }, undefined as unknown as z.ZodType)).toThrow();
+});

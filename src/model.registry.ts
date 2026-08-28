@@ -82,13 +82,16 @@ export const createModelRegistry = <T extends Record<string, z.ZodType>>(registr
     data: Record<string, unknown>,
   ): z.infer<ModelRegistry[K]>;
   function fromJson<S extends z.ZodType>(
-    type: ModelType,
+    type: ModelType | null,
     data: Record<string, unknown>,
     schema: S,
   ): z.infer<S>;
-  function fromJson(type: ModelType, data: Record<string, unknown>, schema?: z.ZodType): unknown {
-    const targetSchema = schema ?? registry[type];
-    const revived = reviveDates(targetSchema, { ...data, _type: type });
+  function fromJson(type: ModelType | null, data: Record<string, unknown>, schema?: z.ZodType) {
+    const targetSchema = schema ?? (type ? registry[type] : undefined);
+    if (!targetSchema) {
+      throw new Error(`No schema found for type "${type}"`);
+    }
+    const revived = reviveDates(targetSchema, type ? { ...data, _type: type } : data);
     return targetSchema.parse(revived);
   }
 
