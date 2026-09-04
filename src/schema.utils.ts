@@ -41,6 +41,40 @@ export const getDerivedFieldNames = (schema: z.ZodObject) =>
     .filter(([, value]) => getDerivedFrom(value as z.ZodType) !== undefined)
     .map(([key]) => key);
 
+/** the schema ID this field is a single foreign key into, e.g. account_id's is "account" */
+export const getBelongsTo = (field: z.ZodType): string | undefined => {
+  const belongsTo = field.meta()?.belongs_to;
+  return typeof belongsTo === "string" ? belongsTo : undefined;
+};
+
+/** the schema ID this field is an array of foreign keys into, e.g. tag_ids' is "tag" */
+export const getBelongsToMany = (field: z.ZodType): string | undefined => {
+  const belongsToMany = field.meta()?.belongs_to_many;
+  return typeof belongsToMany === "string" ? belongsToMany : undefined;
+};
+
+export type ForeignKeyRef = { field: string; schema: string; many: boolean };
+
+/** every belongs_to/belongs_to_many-tagged field on `schema`, with the schema ID each points to */
+export const getForeignKeys = (schema: z.ZodObject): ForeignKeyRef[] =>
+  Object.entries(schema.shape).reduce<ForeignKeyRef[]>((refs, [key, value]) => {
+    const field = value as z.ZodType;
+    const belongsTo = getBelongsTo(field);
+    if (belongsTo !== undefined) {
+      refs.push({ field: key, schema: belongsTo, many: false });
+      return refs;
+    }
+    const belongsToMany = getBelongsToMany(field);
+    if (belongsToMany !== undefined) {
+      refs.push({ field: key, schema: belongsToMany, many: true });
+    }
+    return refs;
+  }, []);
+
+/** names of every belongs_to/belongs_to_many-tagged field on `schema` */
+export const getForeignKeyFieldNames = (schema: z.ZodObject) =>
+  getForeignKeys(schema).map(({ field }) => field);
+
 export const omitDerivedFields = (schema: z.ZodObject) => {
   const derivedKeys: Record<string, true> = {};
   for (const key of getDerivedFieldNames(schema)) derivedKeys[key] = true;

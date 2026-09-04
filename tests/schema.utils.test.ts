@@ -4,7 +4,11 @@ import {
   decimalStringSchema,
   defineEnum,
   generateId,
+  getBelongsTo,
+  getBelongsToMany,
   getDateToday,
+  getForeignKeyFieldNames,
+  getForeignKeys,
   getSchemaDateFieldNames,
   getSchemaFieldNames,
   ianaTimeZoneSchema,
@@ -134,4 +138,38 @@ test("ianaTimeZoneSchema parses a valid time zone", () => {
 test("ianaTimeZoneSchema rejects an invalid time zone", () => {
   const result = ianaTimeZoneSchema.safeParse("Not/A_Zone");
   expect(result.success).toBe(false);
+});
+
+const invoiceSchema = z.object({
+  id: z.string(),
+  account_id: z.string().meta({ belongs_to: "account" }),
+  contact_ids: z.array(z.string()).meta({ belongs_to_many: "contact" }),
+  title: z.string().optional(),
+});
+
+test("getBelongsTo returns the referenced schema ID for a single foreign key", () => {
+  expect(getBelongsTo(invoiceSchema.shape.account_id)).toBe("account");
+});
+
+test("getBelongsTo returns undefined for a field without belongs_to meta", () => {
+  expect(getBelongsTo(invoiceSchema.shape.title)).toBeUndefined();
+});
+
+test("getBelongsToMany returns the referenced schema ID for an array of foreign keys", () => {
+  expect(getBelongsToMany(invoiceSchema.shape.contact_ids)).toBe("contact");
+});
+
+test("getBelongsToMany returns undefined for a field without belongs_to_many meta", () => {
+  expect(getBelongsToMany(invoiceSchema.shape.title)).toBeUndefined();
+});
+
+test("getForeignKeys lists every belongs_to/belongs_to_many field with its target schema", () => {
+  expect(getForeignKeys(invoiceSchema)).toEqual([
+    { field: "account_id", schema: "account", many: false },
+    { field: "contact_ids", schema: "contact", many: true },
+  ]);
+});
+
+test("getForeignKeyFieldNames returns just the names of the foreign-key fields", () => {
+  expect(getForeignKeyFieldNames(invoiceSchema)).toEqual(["account_id", "contact_ids"]);
 });
